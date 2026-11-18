@@ -179,9 +179,11 @@
 
   /* ---------- theme: the atlas page's choice when embedded, else ?theme=, else the system ---------- */
   function applyTheme() {
-    let t = null;
-    try { if (window.parent !== window) t = parent.document.documentElement.dataset.theme || null; } catch (e) { /* another origin */ }
-    if (!t && (Q.get('theme') === 'dark' || Q.get('theme') === 'light')) t = Q.get('theme');
+    // same-origin parent: copy its explicit choice, or follow the system like it does (a ?theme= baked into
+    // the frame's address would go stale when the system theme changes); otherwise use ?theme=
+    let t = null, seesParent = false;
+    try { if (window.parent !== window) { t = parent.document.documentElement.dataset.theme || null; seesParent = true; } } catch (e) { /* another origin */ }
+    if (!seesParent && (Q.get('theme') === 'dark' || Q.get('theme') === 'light')) t = Q.get('theme');
     if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
   }
   applyTheme();
